@@ -1,15 +1,14 @@
 import PropTypes from "prop-types";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
-const CountdownTimer = ({time, theme, onEnd}) => {
+const CountdownTimer = ({ time, theme, onEnd }) => {
   const [secondsLeft, setSecondsLeft] = useState(time);
   const [isActive, setIsActive] = useState(false);
 
-  // Start or stop the timer based on the isActive state variable
   useEffect(() => {
     if (isActive && secondsLeft > 0) {
       const interval = setInterval(() => {
-        setSecondsLeft(prev => prev - 1);
+        setSecondsLeft((prev) => prev - 1);
       }, 1000);
       return () => clearInterval(interval);
     } else if (secondsLeft === 0) {
@@ -18,20 +17,29 @@ const CountdownTimer = ({time, theme, onEnd}) => {
     }
   }, [isActive, secondsLeft, onEnd]);
 
-  // Utility to format time displayed
+  useEffect(() => {
+    setIsActive(true);
+  }, []);
+
+  // Utility to format time as days, hours, minutes, and seconds
   const formatTime = () => {
-    const minutes = Math.floor(secondsLeft / 60);
-    const seconds = secondsLeft % 60;
-    return `${minutes}:${seconds < 10 ? "0" : ""}`;
+    const days = Math.floor(secondsLeft / (24 * 3600));
+    const hours = Math.floor((secondsLeft % (24 * 3600)) / 3600); // Only hours within a day (0-23)
+    const minutes = Math.floor((secondsLeft % 3600) / 60); // Only minutes within an hour (0-59)
+    const seconds = secondsLeft % 60; // Remaining seconds within a minute
+
+    return `${days} Days : ${hours.toString().padStart(2, "0")} Hours : ${minutes
+      .toString()
+      .padStart(2, "0")} Minutes : ${seconds.toString().padStart(2, "0")} Seconds `;
   };
 
   return (
-    <div className={`timer ${theme} p-4 rounded-lg text-center`}>
-      <h1 className="text-5xl font-bold">{formatTime()}</h1>
+    <div className={`timer ${theme} p-6 rounded-lg text-center`}>
+      <h1 className="text-3xl font-bold">{formatTime()}</h1>
     </div>
   );
 };
-//** DEFINING PROP-TYPES FOR THE COUNTDOWNTIMER COMPONENT */
+
 CountdownTimer.propTypes = {
   time: PropTypes.number.isRequired,
   theme: PropTypes.string.isRequired,
