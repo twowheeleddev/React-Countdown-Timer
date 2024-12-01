@@ -1,13 +1,13 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
-import Holidays from "date-holidays";
-import AppWrapper from "./components/wrappers/AppWrapper";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+
+import CountdownTimer from "./components/CountdownTimer";
+import CustomHolidaysPage from "./components/CustomHolidaysPage";
 import EventForm from "./components/EventForm";
+import HolidayPage from "./components/HolidayPage";
+import Holidays from "date-holidays";
 import TimerList from "./components/TimerList";
 import TimerPage from "./components/TimerPage";
-import CustomHolidaysPage from "./components/CustomHolidaysPage";
-import HolidayPage from "./components/HolidayPage";
-import CountdownTimer from "./components/CountdownTimer";
 
 const App = () => {
   const [timers, setTimers] = useState([]);
@@ -40,7 +40,6 @@ const App = () => {
     return allHolidays.length > 0 ? allHolidays[0] : null;
   }, [customHolidays, hd]);
 
-  // Effect to set the current holiday and initialize the timer
   useEffect(() => {
     const nextHoliday = calculateNextHoliday();
 
@@ -48,23 +47,29 @@ const App = () => {
       setCurrentHoliday(nextHoliday.name);
       const targetDate = nextHoliday.date;
 
-      const interval = setInterval(() => {
+      // Run the timer logic immediately
+      const updateTime = () => {
         const now = new Date();
         const timeLeft = Math.floor((targetDate - now) / 1000);
         setCurrentHolidayTime(timeLeft > 0 ? timeLeft : 0);
 
         if (timeLeft <= 0) {
-          clearInterval(interval);
           const newHoliday = calculateNextHoliday();
           if (newHoliday) {
             setCurrentHoliday(newHoliday.name);
           }
         }
-      }, 1000);
+      };
+
+      // Update time immediately
+      updateTime();
+
+      // Start the interval
+      const interval = setInterval(updateTime, 1000);
 
       return () => clearInterval(interval); // Clean up the interval
     }
-  }, [currentHoliday, calculateNextHoliday]);
+  }, [calculateNextHoliday]);
 
   const handleAddCustomHoliday = (name, date) => {
     const holidayDate = new Date(date);
@@ -113,12 +118,11 @@ const App = () => {
   };
 
   return (
-    <AppWrapper>
       <Routes>
         <Route
           path="/"
           element={
-            <div className="max-w-lg w-full text-center mx-auto mt-10">
+            <div className="max-w-lg w-full text-center mx-auto mt-10 px-4 sm:px-6 md:px-8">
               <div className="mb-6">
                 <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
                   {currentHoliday
@@ -174,7 +178,7 @@ const App = () => {
           element={<HolidayPage customHolidays={customHolidays} />}
         />
       </Routes>
-    </AppWrapper>
+ 
   );
 };
 
